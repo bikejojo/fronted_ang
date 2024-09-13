@@ -1,0 +1,145 @@
+<head>
+    <title>HTML Cliente</title>
+  </head>
+<h1 id="titulo">
+    Clientes
+</h1>
+<div>
+    <p>user-ang works!</p>
+    <br>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Apellido</th>
+          <th scope="col">CI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cliente of directors">
+          <td scope="row">{{ cliente.tipo_usuario }}</td>
+          <td scope="row">{{ cliente.email }}</td>
+          <td scope="row">{{ cliente.ci }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>cliente-ang works!</p>
+    <br>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th  scope="col" >Nombre</th>
+                <th  scope="col" >Apellido</th>
+                <th  scope="col"  >CI </th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let clientee of tecnicos">
+            <td scope="row">{{clientee.nombre}}</td>
+            <td scope="row">{{clientee.apellido}}</td>
+            <td scope="row">{{clientee.ci}}</td>
+          </tr>
+        </tbody>
+    </table>
+    <div><br>
+        <div class="modal-body">
+            <div class="container">
+                <div>
+                    <h3>Clientes Agregar</h3>
+                </div><br><br>
+              <form (submit)="onSubmit()">
+                <label for="nombre"><b>Nombre</b></label>
+                <input
+                  type="text"
+                  placeholder="Introduzca su nombre"
+                  name="nombre"
+                  [(ngModel)]="formData.nombre"
+                  class="form-control"
+                  required
+                />
+                <br><label for="apellido"><b>Apellido</b></label>
+                <input
+                  type="text"
+                  placeholder="Introduzca su apellido"
+                  name="apellido"
+                  class="form-control"
+                  [(ngModel)]="formData.apellido"
+                  required
+                />
+                <br><label for="ci"><b>CI</b></label>
+                <input
+                  type="numeric"
+                  placeholder="Introduzca su numero de carnet"
+                  name="ci"
+                  class="form-control"
+                  [(ngModel)]="formData.ci"
+                  required
+                />
+                <br><label for="telefono"><b>telefono</b></label>
+                <input
+                  type="numeric"
+                  placeholder="Introduzca su telefono"
+                  name="telefono"
+                  class="form-control"
+                  [(ngModel)]="formData.telefono"
+                  required
+                />
+                <br><label for="email"><b>email</b></label>
+                <input
+                  type="text"
+                  placeholder="Introduzca su correo "
+                  name="email"
+                  class="form-control"
+                  [(ngModel)]="formData.email"
+                />
+                <br><label for="password"><b>contraseña</b></label>
+                <input
+                  type="password"
+                  placeholder="Introduzca su contrasenia"
+                  name="password"
+                  minlength="4"
+                  class="form-control"
+                  [(ngModel)]="formData.password"
+                />
+                <br>
+                <label for="ciudad">Seleccione una ciudad</label>
+                  <select [(ngModel)]="formData.ciudades_id" name="ciudad" class="form-control">
+                    <option *ngFor="let ciudad of ciudad" [value]="ciudad.id">{{ ciudad.descripcion }}</option>
+                  </select>
+                <br><label for="foto1"><b>carnet anverso</b></label>
+                <input
+                  type="file"
+                  placeholder="Introduzca su foto de carnet"
+                  name="carnet_anv"
+                  class="form-control"
+                  [(ngModel)]="formData.carnet_anv"
+                  (change)="onFileChange($event, 'carnet_rev')"
+                  required
+                />
+                <br><label for="foto2"><b>carnet reverso</b></label>
+                <input
+                  type="file"
+                  placeholder="Introduzca su foto de carnet"
+                  name="carnet_rev"
+                  class="form-control"
+                  [(ngModel)]="formData.carnet_rev"
+                  (change)="onFileChange($event, 'carnet_rev')"
+                  required
+                />
+                <br><label for="foto3"><b>foto</b></label>
+                <input
+                  type="file"
+                  placeholder="Introduzca su foto de perfil"
+                  name="foto"
+                  class="form-control"
+                  [(ngModel)]="formData.foto"
+                  (change)="onFileChange($event, 'foto')"
+                  required
+                />
+                <br><button type="submit">Guardar datos</button>
+              </form>
+            </div>
+         </div>
+    </div>
+</div>
+

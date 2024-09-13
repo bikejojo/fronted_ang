@@ -1,0 +1,50 @@
+<p>orden works!</p>
+<head>
+    <title>HTML Producto</title>
+  </head>
+<h1 id="titulo">
+    Productos
+</h1>
+<div>
+    <p>Producto-Foto-ang works!</p>
+    <br>
+    <!--<table class="table table-striped">
+        <thead>
+            <tr>
+                <th  scope="col" >Nombre</th> 
+                <th  scope="col" >Apellido</th>
+                <th  scope="col"  >CI </th>
+            </tr>
+        </thead>
+
+    </table>-->
+    <div>
+        <div>
+            <table>
+                <tr>
+                    <th>
+                        <h4>#</h4> 
+                    </th>
+                    <th>
+                        <h4>Contenido</h4>
+                    </th>
+                </tr>
+                <tr>
+                    <td>Nombre Producto</td
+                > <td> {{producto2?.nombre}}</td></tr>
+                <tr>
+                    <td>Precio</td
+                > <td> {{producto2?.precioUnitario}}</td></tr>
+                <tr>
+                    <td>Codigo</td
+                > <td> {{producto2?.codigo}}</td></tr>
+                <tr>
+                    <td>Cantidad</td
+                > <td> {{producto2?.cantidad}}</td></tr>
+                <tr>
+                    <td>Imagen</td
+                > <img *ngIf="producto2?.foto" [src]="producto2?.foto" alt="Imagen del producto" width="100" /></tr>           
+            </table>
+        </div>
+    </div>
+</div>

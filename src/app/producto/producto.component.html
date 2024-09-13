@@ -1,0 +1,67 @@
+<p>producto works!</p>
+<head>
+    <title>HTML Producto</title>
+  </head>
+<h1 id="titulo">
+    Clientes 
+</h1>
+<div>
+    <br>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th  scope="col" >Nombre</th> 
+                <th  scope="col" >Codigo</th>
+                <th  scope="col"  >Cantidad </th>
+                <th  scope="col"  >Acciones </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let producto of productos; trackBy: trackByProductoId" (click)="editProducto(producto)">
+                <td id="p" scope="row" >{{producto.nombre}} </td> 
+                <td id="q" scope="row">{{producto.codigo}}</td>
+                <td id="r" scope="row">{{producto.cantidad}}</td>
+               <!-- <img *ngIf="producto.foto" [src]="producto.foto" alt="{{producto.nombre}}"/> -->
+                <td>
+                    <button (click)="deleteProducto(producto.id)">Eliminar</button> &nbsp;
+                    <button (click)="verProducto(producto)">Ver</button> &nbsp; &nbsp;
+                    <button (click)="receta(producto)">receta</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div>
+        <div class="modal-body">
+            <div class="container">
+                <div>
+                    <h3>Productos Agregar</h3>
+                </div><br>
+                <form  (ngSubmit)="onSubmit()">
+                  <label for="nombre">Nombre:</label> <br>
+                  <input [(ngModel)]="nuevoProducto.nombre" name="nombre" required> <br>
+                
+                  <label for="codigo">Código:</label><br>
+                  <input [(ngModel)]="nuevoProducto.codigo" name="codigo" required><br>
+                
+                  <label for="cantidad">Cantidad:</label><br>
+                  <input [(ngModel)]="nuevoProducto.cantidad" name="cantidad" required><br>
+                
+                  <label for="precioUnitario">Precio Unitario:</label><br>
+                  <input [(ngModel)]="nuevoProducto.precioUnitario" name="precioUnitario" required><br>
+                  <br>
+                  <br><label for="foto"><b>Foto o Documento</b></label>
+                <input
+                  type="File"
+                  name="foto"
+                  class="form-control" required
+                  
+                  (change)="onFileSelected($event)"
+
+                />
+                <button type="submit">{{ isEditMode ? 'Actualizar Producto' : 'Agregar Producto' }}</button>
+                </form>
+                
+            </div>
+         </div>
+    </div>
+</div>

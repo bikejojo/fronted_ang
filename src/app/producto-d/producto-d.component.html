@@ -1,0 +1,26 @@
+<div *ngIf="productod.length > 0; else noData">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Descripción</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Cantidad</th>
+          <th scope="col">ID Producto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let prod of productod">
+            <td>{{ prod.descripcion }}</td>
+            <td>{{ prod.fecha }}</td>
+            <td>{{ prod.cantidad }}</td>
+            <td>{{ prod.id_prod }}</td>
+          </tr>
+          
+      </tbody>
+    </table>
+  </div>
+  <ng-template #noData>
+    <p>No hay datos disponibles.</p>
+  </ng-template>
+  
