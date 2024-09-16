@@ -43,16 +43,16 @@ export class ClienteAngComponent implements OnInit{
   tecnicos : any = []
   ciudad : any=[]
 
-  formData = {
+  formData:{[key:string]:any} = {
     nombre: '',
     apellido: '',
     ci: '',
     email: '',
     telefono: '',
     password: '',
-    carnet_anv: '',
-    carnet_rev: '',
-    foto: '',
+    carnet_anv: null,
+    carnet_rev: null,
+    foto: null,
     ciudades_id: '',
   };
 
@@ -60,7 +60,7 @@ export class ClienteAngComponent implements OnInit{
     const file = event.target.files[0];
     this.formData[fileKey] = file; // Guarda el archivo en formData
   }
-  
+
   constructor(){}
   ngOnInit() {
    this.getTecnicos();
@@ -145,99 +145,143 @@ export class ClienteAngComponent implements OnInit{
     .catch((error) => console.error('ciudad', error));
   }
 
-  async onSubmit(){
+    loginFormData = {
+      ci: '',
+      password: ''
+}
 
+  async onSubmit() {
     try {
-      const userJson = {
-        email: this.formData.email,
-        password: this.formData.password,
-        ci: this.formData.ci,
-        tipo_usuario: 1,
-      };
+        const userJson = {
+            email: this.formData['email'],
+            password: this.formData['password'],
+            ci: this.formData['ci'],
+            tipo_usuario: 1,
+        };
 
-    let response = await fetch('http://127.0.0.1:8000/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: `
-          mutation ($userRequest: JSON!) {
-            createUser(userRequest: $userRequest) {
-              id
-              ci
-              token
+        let response = await fetch('http://127.0.0.1:8000/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: `
+                mutation ($userRequest: JSON!) {
+                    createUser(userRequest: $userRequest) {
+                        id
+                        ci
+                        token
+                    }
+                }
+                `,
+                variables: {
+                    userRequest: userJson,
+                }
+            }),
+        });
+
+        let data = await response.json();
+        console.log('Usuario creado con éxito:', data);
+        const usId = data.data.createUser.id;
+
+        const tecnicoJson = {
+            nombre: this.formData['nombre'],
+            apellido: this.formData['apellido'],
+            email: this.formData['email'],
+            telefono: this.formData['telefono'],
+            contrasenia: this.formData['password'],
+            users_id: usId,
+            ciudades_id: this.formData['ciudades_id'],
+        };
+
+        const formImagen = new FormData();
+        const operations = {
+            query: `
+            mutation ($tecnicoRequest: JSON!, $carnet_anverso: Upload, $carnet_reverso: Upload, $foto: Upload) {
+                createTecnico(tecnicoRequest: $tecnicoRequest, carnet_anverso: $carnet_anverso, carnet_reverso: $carnet_reverso, foto: $foto) {
+                    nombre
+                    apellido
+                    telefono
+                }
             }
-          }
-        `,
-        variables:{
-          userRequest:userJson,
+            `,
+            variables: {
+                tecnicoRequest: tecnicoJson,
+                carnet_anverso: null,
+                carnet_reverso: null,
+                foto: null,
+            }
+        };
+
+        formImagen.append('operations', JSON.stringify(operations));
+
+        // Corregir el map
+        const map = {
+            '0': ['variables.carnet_anverso'],
+            '1': ['variables.carnet_reverso'],
+            '2': ['variables.foto'],
+        };
+        formImagen.append('map', JSON.stringify(map));
+
+        // Agregar los archivos al FormData correctamente
+        formImagen.append('0', this.formData['carnet_anv']); // Archivo del carnet anverso
+        formImagen.append('1', this.formData['carnet_rev']); // Archivo del carnet reverso
+        formImagen.append('2', this.formData['foto']); // Archivo de la foto
+
+        response = await fetch('http://127.0.0.1:8000/graphql', {
+            method: 'POST',
+            body: formImagen,
+        });
+        data = await response.json();
+        if (data.errors) {
+            console.error('Errores al crear técnico:', data.errors);
+        } else {
+            console.log('Técnico creado con éxito:', data.data.createTecnico);
         }
-      }),
-    });
+    } catch (error) {
+        console.error('fallas', error);
+    }
+  }
 
-    let data = await response.json();
-    console.log('Usuario creado con éxito:', data);
-    const usId = data.data.createUser.id;
-    const token = data.data.createUser.token;
 
-    const tecnicoJson = {
-      nombre: this.formData.nombre,
-      apellido: this.formData.apellido,
-      carnet_anverso: this.formData.carnet_anv,
-      carnet_reverso: this.formData.carnet_rev,
-      email: this.formData.email,
-      telefono: this.formData.telefono,
-      contrasenia: this.formData.password,
-      foto: this.formData.foto,
-      users_id: usId,
-      ciudades_id: this.formData.ciudades_id,
+  async onLogin(event: Event) {
+    event.preventDefault();
+
+    const loginJson = {
+      ci: this.loginFormData.ci,
+      password: this.loginFormData.password,
     };
 
-    //console.log('hola',tecnicoJson);
-  const formImagen = new FormData();
-  const operations = {
-  query: `
-      mutation ($tecnicoRequest: JSON!,$carnet_anverso: Upload, $carnet_reverso: Upload, $foto: Upload) {
-        createTecnico(tecnicoRequest: $tecnicoRequest,carnet_anverso: $carnet_anverso,carnet_reverso: $carnet_reverso,foto: $foto) {
-          nombre
-          apellido
-          telefono
-        }
+    try {
+      const response = await fetch('http://127.0.0.1:8000/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            mutation ($ci: String!, $password: String!) {
+              login(ci: $ci, password: $password)
+            }
+          `,
+          variables: {
+            ci: loginJson.ci,
+            password: loginJson.password,
+          }
+        }),
+      });
+
+      const data = await response.json();
+      if (data.errors) {
+        console.error('Error en el login:', data.errors);
+      } else {
+        const token = data.data.login;
+        localStorage.setItem('authToken', token); // Guardar el token en el almacenamiento local
+        console.log('Login exitoso, token recibido:', token);
       }
-    `,
-    variables:{
-      tecnicoRequest:tecnicoJson,
-      carnet_anverso: null,
-      carnet_reverso: null,
-      foto: null,
-    }
-  };
-  formImagen.append('operations',JSON.stringify(operations));
-  const map = {
-    '0' : ['formData.carnet_reverso'],
-    '1' : ['formData.carnet_anverso'],
-    '2' : ['formData.foto'],
-  }
-
-  formImagen.append('map',JSON.stringify(map));
-  formImagen.append('0',this.formData.carnet_rev);
-  formImagen.append('1',this.formData.carnet_rev);
-  formImagen.append('2',this.formData.foto);
-
-  response = await fetch('http://127.0.0.1:8000/graphql',{
-    method:'POST',
-    body: formImagen,
-  })
-  data = await response.json();
-  if (data.errors) {
-    console.error('Errores al crear técnico:', data.errors);
-  } else {
-    console.log('Técnico creado con éxito:', data.data.createTecnico);
-  }
-}catch(error){
-      console.error('fallas',error);
+    } catch (error) {
+      console.error('Fallo en el login:', error);
     }
   }
-
 }
+
