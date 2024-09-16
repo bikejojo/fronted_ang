@@ -92,14 +92,14 @@
                 class="form-control"
                 [(ngModel)]="formData['email']!"
               />
-              <br><label for="password"><b>Contraseña</b></label>
+              <br><label for="contrasenia"><b>Contraseña</b></label>
               <input
                 type="password"
                 placeholder="Introduzca su contraseña"
-                name="password"
+                name="contrasenia"
                 minlength="4"
                 class="form-control"
-                [(ngModel)]="formData['password']!"
+                [(ngModel)]="formData['contrasenia']!"
               />
               <br>
               <label for="ciudad">Seleccione una ciudad</label>
@@ -153,13 +153,13 @@
           />
         </div>
         <div>
-          <label for="password">Contraseña</label>
+          <label for="contrasenia">Contraseña</label>
           <input
             type="password"
-            id="password"
-            name="password"
+            id="contrasenia"
+            name="contrasenia"
             placeholder="Ingrese su contraseña"
-            [(ngModel)]="loginFormData.password"
+            [(ngModel)]="loginFormData.contrasenia"
             required
           />
         </div>
@@ -168,3 +168,20 @@
     </div>
   </div>
 </div>
+<!-- <div>
+  <h3>Seleccione las habilidades del técnico</h3>
+  <form (ngSubmit)="onSumbit2()">
+    <div *ngFor="let habilidad of habilidad">
+      <label>
+        <input
+          type="checkbox"
+          [value]="habilidad.id"
+          (change)="onCheckboxChange($event)"
+        />
+        {{ habilidad.nombre }}
+      </label>
+    </div>
+
+    <button type="submit">Guardar Habilidades</button>
+  </form>
+</div>-->

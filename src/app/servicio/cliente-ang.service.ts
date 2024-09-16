@@ -68,7 +68,7 @@ export class ClienteAngService {
         createUser(userRequest: {
           ci: $ci,
           tipo_usuario: $tipo_usuario,
-          password: $password,
+          contrasenia: $contrasenia,
           email: $email
         }) {
             id

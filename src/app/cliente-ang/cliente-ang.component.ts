@@ -6,7 +6,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 //import { ClienteAngT } from '../servicio/clienteAngT';
 //import { ClienteAngService } from '../servicio/cliente-ang.service';
 import { FormsModule } from '@angular/forms';
-import { Query } from 'apollo-angular';
+//import { Query } from 'apollo-angular';
 //import { Ciudad } from '../servicio/ciudad';
 
 
@@ -31,7 +31,7 @@ export class NgbdModalContent{
 @Component({
   selector: 'app-cliente-ang',
   standalone: true,
-  imports: [HttpClientModule , CommonModule , FormsModule  ],
+  imports: [HttpClientModule , CommonModule , FormsModule , ],
   templateUrl: './cliente-ang.component.html',
   styleUrl: './cliente-ang.component.scss',
 })
@@ -42,6 +42,9 @@ export class ClienteAngComponent implements OnInit{
   directors : any = []
   tecnicos : any = []
   ciudad : any=[]
+  habilidad : any=[]
+  habilidadesSeleccionadas: Set<{ id: string, experiencia: string, descripcion: string }> = new Set();
+
 
   formData:{[key:string]:any} = {
     nombre: '',
@@ -49,7 +52,7 @@ export class ClienteAngComponent implements OnInit{
     ci: '',
     email: '',
     telefono: '',
-    password: '',
+    contrasenia: '',
     carnet_anv: null,
     carnet_rev: null,
     foto: null,
@@ -66,6 +69,7 @@ export class ClienteAngComponent implements OnInit{
    this.getTecnicos();
    this.getUsuarios();
    this.getCiudad();
+   this.getHabilidades();
   }
   //hecho !!!
   getUsuarios() {
@@ -147,14 +151,47 @@ export class ClienteAngComponent implements OnInit{
 
     loginFormData = {
       ci: '',
-      password: ''
+      contrasenia: ''
+}
+//listo
+getHabilidades(){
+  fetch('http://127.0.0.1:8000/graphql',{
+    method:'POST',
+    headers:  {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `
+        query {
+          getAllHabilidades{
+            id
+            nombre
+        }
+    }
+      `,
+    }),
+  })
+  .then((response)=>response.json())
+  .then((data)=>{
+    this.habilidad = data.data.getAllHabilidades;
+  })
+  .catch((error)=>console.error('falla',error))
 }
 
+/*
+onCheckboxChange(event: any) {
+  const habilidadId = event.target.value;
+  if (event.target.checked) {
+    this.habilidadesSeleccionadas.add(habilidadId);
+  } else {
+    this.habilidadesSeleccionadas.delete(habilidadId);
+  }
+}*/
   async onSubmit() {
     try {
         const userJson = {
             email: this.formData['email'],
-            password: this.formData['password'],
+            contrasenia: this.formData['contrasenia'],
             ci: this.formData['ci'],
             tipo_usuario: 1,
         };
@@ -189,7 +226,7 @@ export class ClienteAngComponent implements OnInit{
             apellido: this.formData['apellido'],
             email: this.formData['email'],
             telefono: this.formData['telefono'],
-            contrasenia: this.formData['password'],
+            contrasenia: this.formData['contrasenia'],
             users_id: usId,
             ciudades_id: this.formData['ciudades_id'],
         };
@@ -249,7 +286,7 @@ export class ClienteAngComponent implements OnInit{
 
     const loginJson = {
       ci: this.loginFormData.ci,
-      password: this.loginFormData.password,
+      contrasenia: this.loginFormData.contrasenia,
     };
 
     try {
@@ -260,13 +297,13 @@ export class ClienteAngComponent implements OnInit{
         },
         body: JSON.stringify({
           query: `
-            mutation ($ci: String!, $password: String!) {
-              login(ci: $ci, password: $password)
+            mutation ($ci: String!, $contrasenia: String!) {
+              login(ci: $ci, contrasenia: $contrasenia)
             }
           `,
           variables: {
             ci: loginJson.ci,
-            password: loginJson.password,
+            contrasenia: loginJson.contrasenia,
           }
         }),
       });
@@ -281,6 +318,56 @@ export class ClienteAngComponent implements OnInit{
       }
     } catch (error) {
       console.error('Fallo en el login:', error);
+    }
+  }
+
+  async onSumbit2(){
+    try{
+    const habilidadesJson = {
+      tecnico_id: 1,
+      habilidades: Array.from(this.habilidadesSeleccionadas).map((habilidad) => ({
+        habilidad_id: habilidad,
+        experiencia: habilidad.experiencia || '',
+        descripcion: habilidad.descripcion || '',
+      })),
+    };
+    console.log(JSON.stringify({
+      tecnico_id: habilidadesJson.tecnico_id,
+      habilidades: habilidadesJson.habilidades,
+    }));
+    // Aquí haces una solicitud al backend para guardar las habilidades seleccionadas
+    const response = await fetch('http://127.0.0.1:8000/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
+          mutation($tecnico_id: ID!, $habilidades: JSON!) {
+            assignTecnicoHabilidad(tecnico_id: $tecnico_id, habilidades: $habilidades) {
+              id
+            }
+          }
+        `,
+        variables: {
+          tecnico_id: habilidadesJson.tecnico_id,
+          habilidades: habilidadesJson.habilidades,
+        },
+      }),
+    });
+
+    const data = await response.json();
+    if (data.errors) {
+      if (data.errors) {
+        console.error('habilidades:', data.errors);
+      } else {
+        const token = data.data.login;
+        localStorage.setItem('authToken', token); // Guardar el token en el almacenamiento local
+        console.log('habilidad exitoso, token recibido:', token);
+      }
+    }
+  }catch (error) {
+      console.error('Fallo en el habilidad:', error);
     }
   }
 }
