@@ -6,10 +6,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 //import { ClienteAngT } from '../servicio/clienteAngT';
 //import { ClienteAngService } from '../servicio/cliente-ang.service';
 import { FormsModule } from '@angular/forms';
-//import { Query } from 'apollo-angular';
-//import { Ciudad } from '../servicio/ciudad';
-
-
+import { OperationTypeNode } from 'graphql';
 
 @Component({
   selector: 'ngbd-modal-content',
@@ -25,8 +22,6 @@ import { FormsModule } from '@angular/forms';
 export class NgbdModalContent{
   activeModal = inject(NgbActiveModal);
 }
-
-
 
 @Component({
   selector: 'app-cliente-ang',
@@ -59,6 +54,26 @@ export class ClienteAngComponent implements OnInit{
     ciudades_id: '',
   };
 
+  certificadoForm: { [key: string]: any } = {
+    nombre: '',
+    fecha_certificacion: '',
+    foto_url: null,
+};
+  fotosSeleccionadas: File[] = [];
+
+  onFileChange2(event: any , fileKey: string) {
+    const file = event.target.files[0];
+    this.certificadoForm[fileKey] = file;
+  }
+  onFileChange3(event: any) {
+    const files = event.target.files as FileList;
+    if(files.length > 4){
+      console.error('solo puede subir 3 imagenes');
+      this.fotosSeleccionadas = Array.from(files).slice(0, 3); // Limitar a 3 fotos
+    }else{
+      this.fotosSeleccionadas = Array.from(files);
+    }
+  }
   onFileChange(event: any, fileKey: string) {
     const file = event.target.files[0];
     this.formData[fileKey] = file; // Guarda el archivo en formData
@@ -178,7 +193,7 @@ getHabilidades(){
   .catch((error)=>console.error('falla',error))
 }
 
-/*
+
 onCheckboxChange(event: any) {
   const habilidadId = event.target.value;
   if (event.target.checked) {
@@ -186,7 +201,7 @@ onCheckboxChange(event: any) {
   } else {
     this.habilidadesSeleccionadas.delete(habilidadId);
   }
-}*/
+}
   async onSubmit() {
     try {
         const userJson = {
@@ -236,9 +251,13 @@ onCheckboxChange(event: any) {
             query: `
             mutation ($tecnicoRequest: JSON!, $carnet_anverso: Upload, $carnet_reverso: Upload, $foto: Upload) {
                 createTecnico(tecnicoRequest: $tecnicoRequest, carnet_anverso: $carnet_anverso, carnet_reverso: $carnet_reverso, foto: $foto) {
+                  tecnico{
                     nombre
                     apellido
                     telefono
+                  }
+                  url_anv
+                  url_rev
                 }
             }
             `,
@@ -370,5 +389,118 @@ onCheckboxChange(event: any) {
       console.error('Fallo en el habilidad:', error);
     }
   }
+  async onSubmit3(){
+    const certificadoJson = {
+      nombre:this.certificadoForm['nombre'],
+      fecha_certificacion:this.certificadoForm['fecha_certificacion'],
+      tecnicos_id: "1",
+      foto_url:null,
+    }
+    const formDataFoto = new FormData();
+    try {
+    const operations = {
+      query:`
+      mutation($certificacionRequest:JSON, $foto_url:Upload){
+      createCertificacion(certificacionRequest:$certificacionRequest,foto_url:$foto_url){
+        nombre
+        fecha_certificacion
+        foto_url
+      }
+    }`,
+    variables:{
+      certificacionRequest:certificadoJson,
+      foto_url: null,
+    }
+    }
+    formDataFoto.append('operations',JSON.stringify(operations));
+
+    const map = {
+      '0' : ['variables.foto_url'],
+    };
+    formDataFoto.append('map',JSON.stringify(map));
+    formDataFoto.append('0',this.formData['foto_url']);
+
+    const response = await fetch('http://127.0.0.1:8000/graphql',{
+        method:'POST',
+        body: formDataFoto,
+    });
+
+    const data= await response.json();
+    console.log(certificadoJson);
+    if (data.errors) {
+      console.error('Errores al crear técnico:', data.errors);
+      } else {
+          console.log('Técnico creado con éxito:', data.data.createCertificacion);
+      }
+    }catch (error) {
+      console.error('fallas', error);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  async onSubmit4() {
+    if (this.fotosSeleccionadas.length === 0 || this.fotosSeleccionadas.length > 3) {
+      console.error('No se han seleccionado fotos.');
+      return;
+    }
+    const fotoJson = {
+      tecnicos_id:"1",
+      descripcion:"",
+
+    }
+    const formData = new FormData();
+    const operations = {
+      query: `
+        mutation($fotoTrabajoRequest: JSON, $fotos_url: [Upload!]!) {
+          createFotoTrabajo(fotoTrabajoRequest: $fotoTrabajoRequest, fotos_url: $fotos_url) {
+
+            fotos_url
+
+          }
+        }
+      `,
+      variables: {
+        fotoTrabajoRequest: fotoJson,
+        foto_url: this.fotosSeleccionadas.map(() => null),
+      },
+    };
+    console.log(fotoJson)
+    formData.append('operations', JSON.stringify(operations));
+
+    const map: { [key: string]: string[] } = {};
+    this.fotosSeleccionadas.forEach((file, index) => {
+      map[index] = [`variables.fotos_url.${index}`];
+      formData.append(index.toString(), file);
+    });
+
+    formData.append('map', JSON.stringify(map));
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/graphql', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.errors) {
+        console.error('Error al subir las fotos:', data.errors);
+      } else {
+        console.log('Fotos subidas con éxito:', data.data.createFotos);
+      }
+    } catch (error) {
+      console.error('Error al enviar la solicitud:', error);
+    }
+  }
+
 }
 

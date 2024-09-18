@@ -168,7 +168,8 @@
     </div>
   </div>
 </div>
-<!-- <div>
+<!-- HABILIDADES DE TECNICOOS -->
+<div>
   <h3>Seleccione las habilidades del técnico</h3>
   <form (ngSubmit)="onSumbit2()">
     <div *ngFor="let habilidad of habilidad">
@@ -184,4 +185,54 @@
 
     <button type="submit">Guardar Habilidades</button>
   </form>
-</div>-->
+</div>
+<!--CERTIFICADOS -->
+<div>
+  <div>
+    <div class="container">
+      <h2>Agregar Certificado</h2>
+      <form (ngSubmit)="onSubmit3()"enctype="multipart/form-data">
+        <div>
+          <label for="nombre">Nombre del Certificado:</label>
+          <input
+            type="text"
+            id="nombre"
+            [(ngModel)]="certificadoForm['nombre']"
+            name="nombre"
+            required
+          />
+        </div><div>
+            <label for="fecha_certificacion">Fecha de Certificación:</label>
+            <input
+              type="date"
+              id="fecha_certificacion"
+              [(ngModel)]="certificadoForm['fecha_certificacion']"
+              name="fecha_certificacion"
+              required
+            />
+          </div>
+        <div>
+          <label for="foto_url">Foto del Certificado:</label>
+          <input
+            type="file"
+            id="foto_url"
+            (change)="onFileChange($event, 'foto_url')"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Certificado</button>
+      </form>
+    </div>
+  </div>
+</div>
+<div>
+  <div>
+    <div>
+      <h3>Subir Fotos del Trabajo</h3>
+      <form (ngSubmit)="onSubmit4()">
+          <input type="file" multiple (change)="onFileChange3($event)" accept="image/*">
+          <button type="submit">Subir Fotos</button>
+      </form>
+  </div>
+  </div>
+</div>
