@@ -450,31 +450,32 @@ onCheckboxChange(event: any) {
 
   async onSubmit4() {
     if (this.fotosSeleccionadas.length === 0 || this.fotosSeleccionadas.length > 3) {
-      console.error('No se han seleccionado fotos.');
+      console.error('No se han seleccionado fotos o se seleccionaron más de 3.');
       return;
     }
-    const fotoJson = {
-      tecnicos_id:"1",
-      descripcion:"",
 
-    }
+    const fotoJson = {
+      tecnicos_id: "1",
+      descripcion: "", // Puedes incluir otros campos si es necesario
+    };
+
     const formData = new FormData();
     const operations = {
       query: `
-        mutation($fotoTrabajoRequest: JSON, $fotos_url: [Upload!]!) {
+        mutation($fotoTrabajoRequest: JSON!, $fotos_url: [Upload!]!) {
           createFotoTrabajo(fotoTrabajoRequest: $fotoTrabajoRequest, fotos_url: $fotos_url) {
-
+            id
             fotos_url
-
+            tecnicos_id
           }
         }
       `,
       variables: {
         fotoTrabajoRequest: fotoJson,
-        foto_url: this.fotosSeleccionadas.map(() => null),
+        fotos_url: this.fotosSeleccionadas.map(() => null), // Array de archivos
       },
     };
-    console.log(fotoJson)
+
     formData.append('operations', JSON.stringify(operations));
 
     const map: { [key: string]: string[] } = {};
@@ -495,12 +496,11 @@ onCheckboxChange(event: any) {
       if (data.errors) {
         console.error('Error al subir las fotos:', data.errors);
       } else {
-        console.log('Fotos subidas con éxito:', data.data.createFotos);
+        console.log('Fotos subidas con éxito:', data.data.createFotoTrabajo);
       }
     } catch (error) {
       console.error('Error al enviar la solicitud:', error);
     }
   }
-
 }
 
